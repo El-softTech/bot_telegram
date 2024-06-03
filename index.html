@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Real-time Queue</title>
+    <style>
+        .queue {
+            font-size: 2em;
+        }
+
+        .button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="queue">
+        Current Queue Number: <span id="queueNumber">0</span>
+    </div>
+    <div class="button">
+        <button onclick="getNewQueueNumber()">Get New Queue Number</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        socket.on('queue update', function (queueNumber) {
+            document.getElementById('queueNumber').textContent = queueNumber;
+        });
+
+        function getNewQueueNumber() {
+            socket.emit('new queue number');
+        }
+    </script>
+</body>
+
+</html>
