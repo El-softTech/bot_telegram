@@ -15,7 +15,7 @@ console.log(`Bot path: ${botPath}`);
 
 let currentQueueNumber = 0;
 
-// Mulai bot Telegram
+// Mulai bot Telegra
 const botProcess = spawn("node", [botPath]);
 
 botProcess.stdout.on("data", (data) => {
