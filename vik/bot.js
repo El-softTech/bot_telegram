@@ -72,9 +72,7 @@ bot.on("message", (msg) => {
           ) {
             userData[userId].poli = messageText;
             console.log("Data Pengguna:");
-            console.log("NIK:", userData[userId].nik);
-            console.log("Nama:", userData[userId].nama);
-            console.log("Poli:", userData[userId].poli);
+            console.log("NIK:", userData[userId]);
 
             generateImage(userData[userId]).then((imageBuffer) => {
               bot

@@ -10,14 +10,14 @@ async function generateImage(userData) {
     path.join(__dirname, "card.html"),
     "utf8"
   );
-  const imagePath = path.join(__dirname, "rs.jpg");
+  const imagePath = path.join(__dirname, "rsi.png");
 
   const content = templateHtml
     .replace("<%= antrian %>", userData.antrian)
     .replace("<%= nik %>", userData.nik)
     .replace("<%= nama %>", userData.nama)
     .replace("<%= poli %>", userData.poli)
-    .replace("<%= imagePath %>", "file://" + imagePath);
+    .replace("<%= imagePath %>", imagePath);
 
   await page.setContent(content);
 

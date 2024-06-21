@@ -6,8 +6,8 @@ const socketIo = require("socket.io");
 
 const app = express();
 const port = 3000;
-const server = http.createServer(app);
-const io = socketIo(server);
+// const server = http.createServer(app);
+// const io = socketIo(server);
 const botPath = path.join(__dirname, "vik", "bot.js");
 
 // Verifikasi path yang dihasilkan
@@ -30,32 +30,38 @@ botProcess.on("close", (code) => {
   console.log(`Bot process exited with code ${code}`);
 });
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
+// io.on("connection", (socket) => {
+//   console.log("a user connected");
 
-  // Send the current queue number to the newly connected client
-  socket.emit("queue update", currentQueueNumber);
+//   // Send the current queue number to the newly connected client
+//   socket.emit("queue update", currentQueueNumber);
 
-  // Handle the event when a client requests a new queue number
-  socket.on("new queue number", () => {
-    currentQueueNumber++;
-    io.emit("queue update", currentQueueNumber); // Update all clients
-  });
+//   // Handle the event when a client requests a new queue number
+//   socket.on("new queue number", () => {
+//     currentQueueNumber++;
+//     io.emit("queue update", currentQueueNumber); // Update all clients
+//   });
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log("user disconnected");
+//   });
+// });
 
 // Endpoint sederhana
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+let registeredUsers = []; // Simpan data pengguna yang sudah mendaftar
+
+// Endpoint untuk menerima data pengguna baru
+app.post("/new-user", (req, res) => {
+  const userData = req.body; // Data pengguna baru dari frontend/bot
+  registeredUsers.push(userData); // Tambahkan ke array pengguna terdaftar
+  res.status(200).send("Data pengguna berhasil ditambahkan");
 });
 
-app.get("/nama", (req, res) => {
-  res.send("hello ");
+// Endpoint untuk mengirim data pengguna terdaftar
+app.get("/registered-users", (req, res) => {
+  res.json(registeredUsers); // Kirim data pengguna terdaftar sebagai respons
 });
 
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(port, () => {
+  console.log(`Backend berjalan di http://localhost:${port}`);
 });

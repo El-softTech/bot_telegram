@@ -17,6 +17,7 @@
             padding: 20px;
             text-align: left;
             position: relative;
+            height: 400px;
         }
 
         .header {
@@ -26,8 +27,8 @@
         }
 
         .header img {
-            width: 50px;
-            height: 50px;
+            width: 100px;
+            height: 100px;
             margin-right: 20px;
             border-radius: 50%;
             /* Membuat gambar profil bulat */
@@ -36,6 +37,7 @@
         .header .hospital-name {
             font-size: 18px;
             font-weight: bold;
+            text-align: center;
         }
 
         .separator {
@@ -44,8 +46,8 @@
         }
 
         .info {
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 20px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -53,8 +55,14 @@
 <body>
     <div class="card">
         <div class="header">
-            <img id="profileImage" src="" alt="Profile Image">
-            <div class="hospital-name">Rumah Sakit Bunda Harapan</div>
+            <img class="profileImage" src="" alt="Profile Image">
+            <div style="display: flex; flex-direction: column; ">
+                <div class="hospital-name">Rumah Sakit Pasti Sembuh</div>
+                <div style="text-align: center;"> Gang Mawar 5, RT 01/RW 02, Kelurahan jambu air
+                    Kecamatan melon, Kota Sejahtera
+                    Provinsi Harmoni, </div>
+            </div>
+
         </div>
         <div class="separator"></div>
         <div class="info">No Antrian: <span id="antrian"></span></div>
@@ -64,13 +72,17 @@
     </div>
 
     <script>
-        // Masukkan data yang diperlukan ke dalam elemen HTML
-        document.getElementById('antrian').innerText = '<%= antrian %>';
-        document.getElementById('nik').innerText = '<%= nik %>';
-        document.getElementById('nama').innerText = '<%= nama %>';
-        document.getElementById('poli').innerText = '<%= poli %>';
-        document.getElementById('profileImage').src = '<%= imagePath %>';
+        document.addEventListener("DOMContentLoaded", function (event) {
+            // Masukkan data yang diperlukan ke dalam elemen HTML
+            document.getElementById('antrian').innerText = '<%= antrian %>';
+            document.getElementById('nik').innerText = '<%= nik %>';
+            document.getElementById('nama').innerText = '<%= nama %>';
+            document.getElementById('poli').innerText = '<%= poli %>';
+            document.getElementsByClassName('profileImage')[0].src = '<%= imagePath %>';
+        });
+
     </script>
+
 </body>
 
 </html>
