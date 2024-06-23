@@ -2,6 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const { generateImage } = require("../views/canvas"); // Update the path accordingly
 const { ref, set, get } = require("firebase/database");
 const { database } = require("../model/firebase");
+const moment = require("moment-timezone");
 
 const botToken = "7449072741:AAFOOt98MrHMDwSiffMkup1A6jPhqvfnXtI"; // Replace with your bot token
 const bot = new TelegramBot(botToken, { polling: true });
@@ -23,9 +24,9 @@ async function generateQueueNumber() {
 }
 
 function isEligibleForQueue(lastQueueTime) {
-  const now = new Date();
-  const sixAMToday = new Date(now.setHours(6, 0, 0, 0));
-  const sixAMTomorrow = new Date(sixAMToday.getTime() + 24 * 60 * 60 * 1000);
+  const now = moment().tz("Asia/Jakarta");
+  const sixAMToday = now.clone().startOf("day").hour(6);
+  const sixAMTomorrow = sixAMToday.clone().add(1, "day");
 
   return (
     (now >= sixAMToday && lastQueueTime < sixAMToday) || now >= sixAMTomorrow
