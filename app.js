@@ -1,21 +1,19 @@
+// app.js
+
 const express = require("express");
 const { spawn } = require("child_process");
 const path = require("path");
-const http = require("http");
-const socketIo = require("socket.io");
+const { database, push } = require("./model/firebase");
+const { ref, set } = require("firebase/database");
 
 const app = express();
-const port = 3000;
-// const server = http.createServer(app);
-// const io = socketIo(server);
+const port = process.env.PORT || 3000;
 const botPath = path.join(__dirname, "vik", "bot.js");
 
 // Verifikasi path yang dihasilkan
 console.log(`Bot path: ${botPath}`);
 
-let currentQueueNumber = 0;
-
-// Mulai bot Telegra
+// Mulai bot Telegram
 const botProcess = spawn("node", [botPath]);
 
 botProcess.stdout.on("data", (data) => {
@@ -30,36 +28,37 @@ botProcess.on("close", (code) => {
   console.log(`Bot process exited with code ${code}`);
 });
 
-// io.on("connection", (socket) => {
-//   console.log("a user connected");
+// Middleware untuk memproses body JSON pada request
+app.use(express.json());
 
-//   // Send the current queue number to the newly connected client
-//   socket.emit("queue update", currentQueueNumber);
+// Endpoint untuk menyimpan data pengguna ke Firebase
+app.post("/save-user", async (req, res) => {
+  const { userId, nama, nik, poli } = req.body;
 
-//   // Handle the event when a client requests a new queue number
-//   socket.on("new queue number", () => {
-//     currentQueueNumber++;
-//     io.emit("queue update", currentQueueNumber); // Update all clients
-//   });
+  if (!userId || !nama || !nik || !poli) {
+    return res.status(400).json({ message: "Data pengguna tidak lengkap" });
+  }
 
-//   socket.on("disconnect", () => {
-//     console.log("user disconnected");
-//   });
-// });
+  const userData = { nama, nik, poli, step: "poli" };
 
-// Endpoint sederhana
-let registeredUsers = []; // Simpan data pengguna yang sudah mendaftar
+  try {
+    // Gunakan push untuk membuat entri baru dengan kunci unik
+    const newUserRef = push(ref(database, `users/${userId}`)); // Membuat kunci unik secara otomatis
+    await set(newUserRef, userData);
 
-// Endpoint untuk menerima data pengguna baru
-app.post("/new-user", (req, res) => {
-  const userData = req.body; // Data pengguna baru dari frontend/bot
-  registeredUsers.push(userData); // Tambahkan ke array pengguna terdaftar
-  res.status(200).send("Data pengguna berhasil ditambahkan");
+    console.log("Data berhasil ditulis ke Firebase Realtime Database");
+    return res.status(200).json({ message: "Data pengguna berhasil disimpan" });
+  } catch (error) {
+    console.error("Gagal menulis data:", error);
+    return res
+      .status(500)
+      .json({ message: "Terjadi kesalahan saat menyimpan data" });
+  }
 });
 
-// Endpoint untuk mengirim data pengguna terdaftar
-app.get("/registered-users", (req, res) => {
-  res.json(registeredUsers); // Kirim data pengguna terdaftar sebagai respons
+// Endpoint sederhana
+app.get("/", (req, res) => {
+  res.send("Backend berjalan!");
 });
 
 app.listen(port, () => {

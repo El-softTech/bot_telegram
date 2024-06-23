@@ -1,10 +1,26 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { generateImage } = require("../canvas"); // Update the path accordingly
+const { generateImage } = require("../views/canvas"); // Update the path accordingly
+const { ref, set, get } = require("firebase/database");
+const { database } = require("../model/firebase");
 
-const botToken = "7449072741:AAFOOt98MrHMDwSiffMkup1A6jPhqvfnXtI";
+const botToken = "7449072741:AAFOOt98MrHMDwSiffMkup1A6jPhqvfnXtI"; // Replace with your bot token
 const bot = new TelegramBot(botToken, { polling: true });
 
 const userData = {};
+
+// Function to generate a unique queue number
+async function generateQueueNumber() {
+  const queueRef = ref(database, "queueNumber");
+  let queueNumberSnapshot = await get(queueRef);
+  let queueNumber = 1;
+
+  if (queueNumberSnapshot.exists()) {
+    queueNumber = queueNumberSnapshot.val() + 1;
+  }
+
+  await set(queueRef, queueNumber);
+  return queueNumber;
+}
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
@@ -26,7 +42,7 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(chatId, greetingMessage, keyboard);
 });
 
-bot.on("message", (msg) => {
+bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
   const userId = msg.from.id;
   const messageText = msg.text;
@@ -72,7 +88,22 @@ bot.on("message", (msg) => {
           ) {
             userData[userId].poli = messageText;
             console.log("Data Pengguna:");
-            console.log("NIK:", userData[userId]);
+            console.log("NIK:", userData[userId].nik);
+
+            // Generate queue number
+            const queueNumber = await generateQueueNumber();
+            userData[userId].queueNumber = queueNumber;
+
+            // Simpan data ke Firebase Realtime Database
+            const userRef = ref(database, `users/${userId}`);
+            try {
+              await set(userRef, userData[userId]);
+              console.log(
+                "Data berhasil ditulis ke Firebase Realtime Database"
+              );
+            } catch (error) {
+              console.error("Gagal menulis data:", error);
+            }
 
             generateImage(userData[userId]).then((imageBuffer) => {
               bot
