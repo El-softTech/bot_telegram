@@ -22,6 +22,16 @@ async function generateQueueNumber() {
   return queueNumber;
 }
 
+function isEligibleForQueue(lastQueueTime) {
+  const now = new Date();
+  const sixAMToday = new Date(now.setHours(6, 0, 0, 0));
+  const sixAMTomorrow = new Date(sixAMToday.getTime() + 24 * 60 * 60 * 1000);
+
+  return (
+    (now >= sixAMToday && lastQueueTime < sixAMToday) || now >= sixAMTomorrow
+  );
+}
+
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   const firstName = msg.from.first_name;
@@ -51,6 +61,21 @@ bot.on("message", async (msg) => {
     bot.sendMessage(chatId, "Antrian belum tersedia");
     delete userData[userId]; // Reset state pengguna jika ada
   } else if (messageText === "Mengambil Antrian") {
+    const userRef = ref(database, `users/${userId}`);
+    const userSnapshot = await get(userRef);
+
+    if (userSnapshot.exists()) {
+      const lastQueueTime = userSnapshot.val().lastQueueTime;
+
+      if (!isEligibleForQueue(lastQueueTime)) {
+        bot.sendMessage(
+          chatId,
+          "Satu akun hanya untuk satu kali daftar untuk satu hari."
+        );
+        return;
+      }
+    }
+
     bot.sendMessage(chatId, "Silakan kirim nomor NIK:");
     userData[userId] = { step: "nik" };
   } else if (messageText === "Laporan") {
@@ -93,6 +118,7 @@ bot.on("message", async (msg) => {
             // Generate queue number
             const queueNumber = await generateQueueNumber();
             userData[userId].queueNumber = queueNumber;
+            userData[userId].lastQueueTime = new Date().getTime();
 
             // Simpan data ke Firebase Realtime Database
             const userRef = ref(database, `users/${userId}`);
