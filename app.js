@@ -56,9 +56,10 @@ app.post("/save-user", async (req, res) => {
   }
 });
 
-// Endpoint sederhana
+// Endpoint untuk mengirimkan file dashboard.html
 app.get("/", (req, res) => {
-  res.send("Backend berjalan!");
+  const dashboardPath = path.join(__dirname, "views", "dasbord.html");
+  res.sendFile(dashboardPath);
 });
 
 app.listen(port, () => {

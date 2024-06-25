@@ -10,16 +10,23 @@ async function generateImage(userData) {
     path.join(__dirname, "card.html"),
     "utf8"
   );
-  const imagePath = path.join(__dirname, "rsi.png");
+  const imagePath = path.join(__dirname, "..", "aset", "image.png");
+  const imagePathUrl = `file://${imagePath}`;
 
   const content = templateHtml
     .replace("<%= antrian %>", userData.queueNumber)
     .replace("<%= nik %>", userData.nik)
     .replace("<%= nama %>", userData.nama)
     .replace("<%= poli %>", userData.poli)
-    .replace("<%= imagePath %>", imagePath);
+    .replace("<%= imagePath %>", imagePathUrl);
 
   await page.setContent(content);
+
+  // Tunggu sampai gambar latar belakang selesai dimuat
+  await page.waitForSelector(".card", {
+    visible: true,
+    timeout: 3000,
+  });
 
   // Ambil screenshot dari elemen dengan kelas 'card'
   const cardElement = await page.$(".card");

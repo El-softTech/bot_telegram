@@ -69,20 +69,18 @@
 
         // Fungsi untuk memperbarui tampilan daftar pendaftar
         function updatePendaftarList(snapshot) {
-            console.log('Memperbarui daftar pendaftar...');
             const pendaftarList = document.getElementById('pendaftar-list');
             pendaftarList.innerHTML = ''; // Kosongkan daftar pendaftar
             snapshot.forEach((childSnapshot) => {
                 const userId = childSnapshot.key;
                 const userData = childSnapshot.val();
-                console.log('User Data:', userData);
 
                 // Buat card untuk setiap entri pengguna menggunakan template literal
                 const cardHtml = `
                     <div class="mb-4 p-4 border rounded-md shadow-md">
                         <h3 class="text-lg font-semibold mb-2">Nama: ${userData.nama}</h3>
-                         <div class="mt-4">
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2" onclick="panggilUser('${userId}')">Panggil</button>
+                        <div class="mt-4">
+                            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2" onclick="panggilUser('${userId}', ${userData.queueNumber})">Panggil</button>
                             <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onclick="lewatUser('${userId}')">Lewat</button>
                         </div>
                     </div>
@@ -95,26 +93,26 @@
 
         // Fungsi untuk memperbarui jumlah pendaftar
         function updateJumlahPendaftar(snapshot) {
-            console.log('Memperbarui jumlah pendaftar...');
             const jumlahPendaftar = snapshot.numChildren();
             document.getElementById('jumlah-pendaftar').textContent = jumlahPendaftar;
         }
 
         // Listener untuk perubahan data pada users
         usersRef.on('value', (snapshot) => {
-            console.log('Data snapshot:', snapshot.val());
             updatePendaftarList(snapshot);
             updateJumlahPendaftar(snapshot);
         });
 
-        // Fungsi untuk memperbarui nomor antrian sekarang (dummy data)
-        function updateNomorAntrianSekarang() {
-            const nomorAntrianSekarang = 1; // Gantilah dengan logika Anda sendiri untuk nomor antrian sekarang
-            document.getElementById('nomor-antrian-sekarang').textContent = nomorAntrianSekarang;
+        // Fungsi untuk memperbarui nomor antrian sekarang
+        function updateNomorAntrianSekarang(queueNumber) {
+            document.getElementById('nomor-antrian-sekarang').textContent = queueNumber;
         }
 
-        // Memperbarui nomor antrian sekarang
-        updateNomorAntrianSekarang();
+        // Fungsi untuk memanggil pengguna
+        function panggilUser(userId, queueNumber) {
+            updateNomorAntrianSekarang(queueNumber);
+            // Di sini, Anda dapat menambahkan logika tambahan seperti mengubah status pengguna di database jika diperlukan
+        }
 
         // Fungsi untuk mereset nomor antrian
         function resetQueueNumber() {
@@ -122,7 +120,7 @@
             queueRef.set(0)
                 .then(() => {
                     console.log('Nomor antrian berhasil direset');
-                    updateNomorAntrianSekarang(); // Perbarui tampilan nomor antrian
+                    updateNomorAntrianSekarang(''); // Kosongkan tampilan nomor antrian
                 })
                 .catch((error) => {
                     console.error('Gagal mereset nomor antrian:', error);
